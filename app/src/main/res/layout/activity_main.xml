@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/btnLed1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="112dp"
+        android:text="Led 1"
+        app:layout_constraintBottom_toTopOf="@+id/btnLed2"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <Button
+        android:id="@+id/btnLed3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Led 3"
+        app:layout_constraintTop_toBottomOf="@+id/btnLed2"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <Button
+        android:id="@+id/btnLed2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Led 2"
+        app:layout_constraintTop_toBottomOf="@+id/btnLed1"
+        tools:layout_editor_absoluteX="-16dp" />
+
+    <Button
+        android:id="@+id/btnConexao"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="21dp"
+        android:text="Conectar"
+        app:layout_constraintTop_toBottomOf="@+id/btnLed3"
+        tools:layout_editor_absoluteX="166dp" />
+
+    <Button
+        android:id="@+id/btnBusca"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Buscar"
+        app:layout_constraintTop_toBottomOf="@+id/btnConexao"
+        tools:layout_editor_absoluteX="153dp" />
+
+    <ListView
+        android:id="@+id/listaBusca"
+        android:layout_width="382dp"
+        android:layout_height="364dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="13dp"
+        android:layout_marginBottom="18dp"
+        android:cacheColorHint="#270E0E"
+        android:foreground="@drawable/ic_launcher_foreground"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnBusca" />
+
+</android.support.constraint.ConstraintLayout>
