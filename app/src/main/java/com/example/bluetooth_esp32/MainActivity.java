@@ -11,10 +11,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -22,6 +25,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -34,10 +38,11 @@ public class MainActivity extends AppCompatActivity {
     private static final int SOLICITA_ATIVACAO = 1;
     private static final int SOLICITA_CONEXAO = 2;
 
-    ConnectedThread connectedThread;
+    MyBluetoothService.ConnectedThread connectedThread;
 
     boolean conexao = false;
     private static String MAC = null;
+
 
     BluetoothAdapter meuBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     BluetoothDevice meuDevice = null; //Device disposito remoto q tentara se conectar
@@ -94,7 +99,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if(conexao){
-                    connectedThread.enviar("led1");
+                   // MyBluetoothService.connectedThread.enviar("led1");
+
 
                 }else{
                     Toast.makeText(getApplicationContext(), "Não há coneção ativa !", Toast.LENGTH_LONG).show();
@@ -131,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
                         meuSocket = meuDevice.createRfcommSocketToServiceRecord(MEU_UUID);
                         meuSocket.connect();
                         conexao = true;
-                        connectedThread = new ConnectedThread(meuSocket);
+                        connectedThread = new MyBluetoothService.ConnectedThread(meuSocket);
                         connectedThread.start();
                         btnConexao.setText("Desconectar");
 
@@ -152,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public class MyBluetoothService {
+    public static class MyBluetoothService {
         private static final String TAG = "MY_APP_DEBUG_TAG";
         private Handler handler; // handler that gets info from Bluetooth service
 
@@ -166,11 +172,12 @@ public class MainActivity extends AppCompatActivity {
             // ... (Add other message types here as needed.)
         }
 
-        public class ConnectedThread extends Thread {
+        public static class ConnectedThread extends Thread {
             private final BluetoothSocket mmSocket;
-            private final InputStream mmInStream;
-            private final OutputStream mmOutStream;
+            private InputStream mmInStream;
+            private OutputStream mmOutStream;
             private byte[] mmBuffer; // mmBuffer store for the stream
+            private Handler handler;
 
             public ConnectedThread(BluetoothSocket socket) {
                 //mmSocket = socket;
@@ -190,28 +197,37 @@ public class MainActivity extends AppCompatActivity {
                     Log.e(TAG, "Error occurred when creating output stream", e);
                 }
 
-                mmInStream = tmpIn;
+               mmInStream = tmpIn;
                 mmOutStream = tmpOut;
+                mmSocket = null;
             }
 
             public void run() {
+                InputStream tmpIn = null;
+                OutputStream tmpOut = null;
+                mmInStream = tmpIn;
+                mmOutStream = tmpOut;
+
                 mmBuffer = new byte[1024];
                 int numBytes; // bytes returned from read()
 
                 // Keep listening to the InputStream until an exception occurs.
                 while (true) {
-                    //try {
-                     //   // Read from the InputStream.
-                      //  numBytes = mmInStream.read(mmBuffer);
-                        // Send the obtained bytes to the UI activity.
-                      //  Message readMsg = handler.obtainMessage(
-                         //       MessageConstants.MESSAGE_READ, numBytes, -1,
-                          //      mmBuffer);
-                     //   readMsg.sendToTarget();
-                  //  } catch (IOException e) {
-                    //    Log.d(TAG, "Input stream was disconnected", e);
-                    //    break;
-                   // }
+                    while (true) {
+                        try {
+                           // Read from the InputStream.
+                          numBytes = mmInStream.read(mmBuffer);
+                         //Send the obtained bytes to the UI activity.
+                         Message readMsg = handler.obtainMessage(
+                               MessageConstants.MESSAGE_READ, numBytes, -1,
+                              mmBuffer);
+                           readMsg.sendToTarget();
+                          } catch (IOException e) {
+                            Log.d(TAG, "Input stream was disconnected", e);
+                            break;
+                         }
+                    }
+                }
                 }
             }
 
@@ -222,9 +238,9 @@ public class MainActivity extends AppCompatActivity {
                     mmOutStream.write(msgBuffer);
 
                     // Share the sent message with the UI activity.
-                    Message writtenMsg = handler.obtainMessage(
-                            MessageConstants.MESSAGE_WRITE, -1, -1, mmBuffer);
-                    writtenMsg.sendToTarget();
+                  //  Message writtenMsg = handler.obtainMessage(
+                          //  MessageConstants.MESSAGE_WRITE, -1, -1, mmBuffer);
+                  //  writtenMsg.sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, "Error occurred when sending data", e);
 
@@ -240,17 +256,16 @@ public class MainActivity extends AppCompatActivity {
             }
 
             // Call this method from the main activity to shut down the connection.
-           // public void cancel() {
-             //   try {
-                //    mmSocket.close();
-              //  } catch (IOException e) {
-              //      Log.e(TAG, "Could not close the connect socket", e);
-             //   }
-           // }
+            // public void cancel() {
+            //   try {
+            //    mmSocket.close();
+            //  } catch (IOException e) {
+            //      Log.e(TAG, "Could not close the connect socket", e);
+            //   }
+            // }
         }
     }
 
 
 
-}
 
